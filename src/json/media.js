@@ -1,0 +1,1 @@
+export default { "media" :["animation1.mp4","animation2.mp4","chickentonight.mp4","despot.mp4","doctor.mp4","evolution.mp4","fruitloops.mp4","growth.mp4","hidalgo.mp4","jericho.mp4","morpheus.mp4","morty.mp4","pulgassari1.mp4","pulgassari2.mp4","zim-1.mp4","zim-2.mp4","zim-3.mp4"]};

@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Hello World</title>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.5.1/pixi.min.js"></script>
+<body>
+<script type="text/javascript">
+var VideoPlatform = {
+  app: new PIXI.Application(window.innerWidth, window.innerHeight, { transparent: true }),
+  texture: PIXI.Texture.fromVideo('./video/morty.mp4'),
+  filter: new PIXI.filters.ColorMatrixFilter(),
+  enabled: true,
+  media:{
+    morty: './video/morty.mp4',
+    doctor: './video/doctor.mp4',
+    // animation1: './video/animation1.mp4',
+    // despot: './video/despot.mp4',
+    // fruitloops: './video/fruitloops.mp4',
+    // pulgassari1: './video/pulgassari1.mp4',
+    // morpheus: './video/morpheus.mp4',
+    // pulgassari2: './video/pulgassari2.mp4',
+    // animation2: './video/animation2.mp4',
+    // hidalgo: './video/hidalgo.mp4',
+    // chickentonight: './video/chickentonight.mp4',
+    // zim1: './video/zim-1.mp4',
+    // jericho: './video/jericho.mp4',
+    // zim2: './video/zim-2.mp4',
+    // hannibal: './video/hannibal.mp4',
+    // zim3: './video/zim-3.mp4',
+    // zim4: './video/zim-4.mp4',
+    // queen: './img/queen.jpg'
+  },
+  currentMediaIndex: 0,
+  setup() {
+    // PIXI.loader
+    //   .add('./video/morty.mp4')
+    //   .load(this.webSocketSetup);
+  },
+
+  webSocketSetup(){
+    var ws = new WebSocket("ws://159.203.24.19:4000/");
+    let vm = this;
+    ws.onopen = function () {
+      //  ws.send("morty"); // this works
+      console.log("Connection opened...");
+    };
+
+    ws.onmessage = function (event) {
+      console.log(event.data, vm);
+      vm.handleInput(event.data);
+    };
+
+    ws.onclose = function () {
+      console.log("Connection closed...");
+    };
+    this.startApp();
+    // this.theMortys();
+  },
+
+  startApp() {
+    // https://pixijs.github.io/examples/#/basics/video.js
+      document.body.appendChild(this.app.view);
+      // console.log(Object.keys(this.media)[0], this.currentMediaIndex)
+      // console.log(this.mediap[this.currentMediaIndex])
+      // this.nextVideo(this.media[Object.keys(this.media)[this.currentMediaIndex]]);
+      this.theMortys(0);
+
+      var container = new PIXI.Container();
+      container.x = this.app.renderer.width / 2;
+      container.y = this.app.renderer.height / 2;
+      this.app.stage.addChild(container);
+
+      // this.app.stage.filters = [this.filter];
+      let count = 0;
+      let vm = this;
+      this.app.ticker.add(function(delta) {
+          if(vm.currentTime() === vm.duration()){
+            vm.currentMediaIndex++;
+            if(Object.keys(vm.media).length <= vm.currentMediaIndex){
+              vm.currentMediaIndex=0;
+            }
+            vm.nextVideo(vm.media[Object.keys(vm.media)[vm.currentMediaIndex]]);
+          }
+          count += 0.1;
+
+          var matrix = vm.filter.matrix;
+
+          matrix[1] = Math.sin(count) * 3;
+          matrix[2] = Math.cos(count);
+          matrix[3] = Math.cos(count) * 1.5;
+          matrix[4] = Math.sin(count / 3) * 2;
+          matrix[5] = Math.sin(count / 2);
+          matrix[6] = Math.sin(count / 4);
+      });
+  },
+
+  handleInput(data){
+    console.log(data);
+    if(data === 'morty'){
+      this.theMortys(0);
+    } else if(data === 'filter'){
+      this.enabled = !this.enabled;
+      this.app.stage.filters = this.enabled ? [this.filter] : null;
+      // this.app.stage.filters = null;
+    } else if(this.media[data].indexOf('./img/') !== -1){
+      console.log('go to an image');
+
+      this.app.stage.filters = null;
+      this.addImage(this.media[data]);
+    } else {
+      this.nextVideo(this.media[data]);
+    }
+
+  },
+
+  theMortys(mortyCount) {
+    console.log(this.media.morty, PIXI);
+    this.texture = PIXI.Texture.fromVideo(this.media.morty);
+    this.mute();
+    this.pause();
+
+    var videoSprite;
+    console.log(mortyCount)
+    for (morty = 0; morty < mortyCount; morty++) {
+      videoSprite = new PIXI.Sprite(this.texture);
+      videoSprite.width = this.app.renderer.width/mortyCount;
+      videoSprite.height = this.app.renderer.height/mortyCount;
+      videoSprite.x = 100*morty;
+      videoSprite.y = 100*morty;
+      this.app.stage.addChild(videoSprite);
+    }
+    let vm = this;
+    if(mortyCount < 10){
+      setTimeout(function(){
+        mortyCount++
+        vm.theMortys(mortyCount)
+        videoSprite.destroy();
+      }, 1000);
+    } else {
+      // this.nextVideo(this.nextVideo(this.media[Object.keys(this.media)[this.currentMediaIndex]]));
+    }
+  },
+
+  nextVideo(url){
+    console.log(url)
+    this.texture = PIXI.Texture.fromVideo(url);
+    this.mute();
+    this.pause();
+
+    var videoSprite = new PIXI.Sprite(this.texture);
+    videoSprite.width = this.app.renderer.width;
+    videoSprite.height = this.app.renderer.height;
+    this.app.stage.addChild(videoSprite);
+  },
+
+  addImage(url){
+    // This creates a texture from a 'bunny.png' image.
+    var bunny = PIXI.Sprite.fromImage(url)
+
+    // Setup the position of the bunny
+    bunny.x = this.app.renderer.width / 2;
+    bunny.y = this.app.renderer.height / 2;
+
+    // Rotate around the center
+    bunny.anchor.x = 0.5;
+    bunny.anchor.y = 0.5;
+
+    // Add the bunny to the scene we are building.
+    this.app.stage.addChild(bunny);
+  },
+  loop(){
+    this.texture.baseTexture.source.loop = true;
+  },
+
+  mute(){
+    this.texture.baseTexture.source.muted = true;
+  },
+  pause (){
+    this.texture.baseTexture.source.pause();
+
+  },
+
+  currentTime(){
+    return this.texture.baseTexture.source.currentTime;
+  },
+
+  duration(){
+    return this.texture.baseTexture.source.duration;
+  },
+
+  play(){
+    this.texture.baseTexture.source.play();
+  }
+}
+
+VideoPlatform.webSocketSetup();
+</script>
+</body>
+</html>

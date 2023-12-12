@@ -1,0 +1,33 @@
+{
+  "name": "ReactSeed",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.3.1",
+    "node-sass-chokidar": "^1.3.3",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-router-dom": "^4.2.2",
+    "react-scripts": "1.0.14",
+    "s3": "^4.4.0"
+  },
+  "devDependencies": {
+    "a11y": "^0.5.0",
+    "enzyme": "^2.9.1",
+    "eslint": "^4.3.0",
+    "jest": "^20.0.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "server": "node get-media",
+    "build-css": "node-sass-chokidar src/ -o src/",
+    "watch-css": "node-sass-chokidar src/index.scss -o src/ --watch",
+    "watch-cssRecursive": "node-sass-chokidar src/ -o src/ --watch --recursive",
+    "lint": "eslint -c ./.eslintrc.json ./src/. --fix",
+    "build": "react-scripts build",
+    "push": "node pushS3.js",
+    "build-push": "npm run build && npm run push",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
