@@ -32,9 +32,21 @@ const Home = () => {
   const ctxRef = useRef();
   const videoRef = useRef();
 
+  const [conn, setConn] = useState(new WebSocket("ws://localhost:9000/"));
+
+  // const conn = ;
+
   useEffect(() => {
     setupGlue();
     buildMediaPreview();
+
+    conn.onopen = () =>
+      conn.send(JSON.stringify({ type: "sendQueue", data: [] }));
+    // conn.send(JSON.stringify({ type: "sendQueue", data: queueVideos }));
+
+    conn.onmessage = (e) => {
+      console.log(e);
+    };
 
     return () => {
       // Cleanup or componentWillUnmount logic here
@@ -56,6 +68,46 @@ const Home = () => {
       );
     });
     setThumbnails(thumbnails);
+  };
+
+  const throttleSearchYoutube = (e) => {
+    console.log(e.target.value);
+    // let searchThrottle; // needs to be more globally accessible
+    // clearTimeout(searchThrottle);
+    // const searchThrottle = setTimeout((e) => {
+    const conn = new WebSocket("ws://localhost:9000/");
+
+    conn.onmessage = (e) => {
+      const thumbnails = JSON.parse(e.data).map((videoData) => {
+        return (
+          <img
+            src={videoData.thumbnail}
+            // onClick={() => changeVideo(file)}
+            className="Home__thumbnail"
+          />
+        );
+      });
+
+      console.log(thumbnails);
+      setThumbnails(thumbnails);
+    };
+
+    const options = JSON.stringify({
+      type: "youtubeSearch",
+      searchTerm: e.target.value,
+    });
+
+    conn.onopen = () => conn.send(options);
+    // }, 500);
+  };
+
+  const startYoutubeDl = (videoData) => {
+    const conn = new WebSocket("ws://localhost:9000/");
+    const options = JSON.stringify({
+      type: "youtubeDL",
+      videoData,
+    });
+    conn.onopen = () => conn.send(options);
   };
 
   const changeVideo = (file) => {
@@ -273,6 +325,7 @@ const Home = () => {
             bottom: 0,
           }}
         >
+          <input onChange={throttleSearchYoutube}></input>
           <div onClick={play}>play</div>
           <div onClick={pause}>||</div>
           <div onClick={mute}>mute</div>
