@@ -82,7 +82,7 @@ const Home = () => {
         return (
           <img
             src={videoData.thumbnail}
-            // onClick={() => changeVideo(file)}
+            onClick={() => startYoutubeDl(videoData)}
             className="Home__thumbnail"
           />
         );
